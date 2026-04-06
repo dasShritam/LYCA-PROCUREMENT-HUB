@@ -49,11 +49,11 @@ export default function Dashboard() {
   ];
 
   const filteredNav = navItems.filter(item => item.roles.includes(profile?.role || ''));
-  useEffect(() => {
-  if (window.innerWidth >= 1024) {
-    setIsSidebarOpen(true);
-  }
-}, [isSidebarOpen]);
+//   useEffect(() => {
+//   if (window.innerWidth >= 1024) {
+//     setIsSidebarOpen(true);
+//   }
+// }, [isSidebarOpen]);
   const renderView = () => {
     switch (activeView) {
       case 'dashboard':
