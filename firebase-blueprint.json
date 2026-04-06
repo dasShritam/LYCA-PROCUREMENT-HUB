@@ -1,0 +1,86 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and role information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Unique identifier for the user" },
+        "email": { "type": "string", "format": "email", "description": "User's email address" },
+        "role": { "type": "string", "enum": ["admin", "operation_executive"], "description": "User's role in the system" },
+        "displayName": { "type": "string", "description": "User's display name" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Item": {
+      "title": "Item",
+      "description": "Procurement item definition",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "unit": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "unit"]
+    },
+    "Vendor": {
+      "title": "Vendor",
+      "description": "Vendor definition",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "contact": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name"]
+    },
+    "ProcurementEntry": {
+      "title": "ProcurementEntry",
+      "description": "Daily procurement data entry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "itemId": { "type": "string" },
+        "itemName": { "type": "string" },
+        "itemImageUrl": { "type": "string" },
+        "vendorId": { "type": "string" },
+        "vendorName": { "type": "string" },
+        "vendorImageUrl": { "type": "string" },
+        "qty": { "type": "number" },
+        "unit": { "type": "string" },
+        "rate": { "type": "number" },
+        "total": { "type": "number" },
+        "previousPending": { "type": "number" },
+        "paidToday": { "type": "number" },
+        "currentPending": { "type": "number" },
+        "remarks": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["date", "itemId", "itemName", "vendorId", "vendorName", "qty", "unit", "rate", "total"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/items/{itemId}": {
+      "schema": "Item",
+      "description": "List of items available for procurement"
+    },
+    "/vendors/{vendorId}": {
+      "schema": "Vendor",
+      "description": "List of vendors"
+    },
+    "/procurements/{procurementId}": {
+      "schema": "ProcurementEntry",
+      "description": "Daily procurement records"
+    }
+  }
+}

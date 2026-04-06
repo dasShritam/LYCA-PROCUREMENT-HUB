@@ -1,0 +1,167 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: uid
+    // Fields:
+    //   - uid: string (required)
+    //   - email: string (required)
+    //   - role: string (required, enum: ['admin', 'operation_executive'])
+    //   - displayName: string (optional)
+    //
+    // Collection: items
+    // Document ID: itemId
+    // Fields:
+    //   - name: string (required)
+    //   - unit: string (required)
+    //   - imageUrl: string (optional)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: vendors
+    // Document ID: vendorId
+    // Fields:
+    //   - name: string (required)
+    //   - contact: string (optional)
+    //   - imageUrl: string (optional)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: procurements
+    // Document ID: procurementId
+    // Fields:
+    //   - date: string (required, format: YYYY-MM-DD)
+    //   - itemId: string (required)
+    //   - itemName: string (required)
+    //   - itemImageUrl: string (optional)
+    //   - vendorId: string (required)
+    //   - vendorName: string (required)
+    //   - vendorImageUrl: string (optional)
+    //   - qty: number (required)
+    //   - unit: string (required)
+    //   - rate: number (required)
+    //   - total: number (required)
+    //   - previousPending: number (optional)
+    //   - paidToday: number (optional)
+    //   - currentPending: number (optional)
+    //   - remarks: string (optional)
+    //   - createdBy: string (required)
+    //   - createdAt: timestamp (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        ((request.auth.token.email == "lyca64961@gmail.com" && request.auth.token.email_verified == true) ||
+         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'));
+    }
+
+    function isOperationExecutive() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'operation_executive';
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return hasOnlyAllowedFields(['uid', 'email', 'role', 'displayName']) &&
+             data.uid is string &&
+             data.email is string && isValidEmail(data.email) &&
+             data.role in ['admin', 'operation_executive'];
+    }
+
+    function isValidItem(data) {
+      return hasOnlyAllowedFields(['name', 'unit', 'imageUrl', 'createdAt']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.unit is string && data.unit.size() > 0 && data.unit.size() < 20 &&
+             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() < 1000000)) &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidVendor(data) {
+      return hasOnlyAllowedFields(['name', 'contact', 'imageUrl', 'createdAt']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             (!('contact' in data) || (data.contact is string && data.contact.size() < 100)) &&
+             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() < 1000000)) &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidProcurement(data) {
+      return hasOnlyAllowedFields(['date', 'itemId', 'itemName', 'itemImageUrl', 'vendorId', 'vendorName', 'vendorImageUrl', 'qty', 'unit', 'rate', 'total', 'previousPending', 'paidToday', 'currentPending', 'remarks', 'createdBy', 'createdAt']) &&
+             data.date is string && data.date.matches("^[0-9]{4}-[0-9]{2}-[0-9]{2}$") &&
+             data.itemId is string &&
+             data.itemName is string &&
+             (!('itemImageUrl' in data) || (data.itemImageUrl is string && data.itemImageUrl.size() < 1000000)) &&
+             data.vendorId is string &&
+             data.vendorName is string &&
+             (!('vendorImageUrl' in data) || (data.vendorImageUrl is string && data.vendorImageUrl.size() < 1000000)) &&
+             data.qty is number && data.qty >= 0 &&
+             data.unit is string &&
+             data.rate is number && data.rate >= 0 &&
+             data.total is number && data.total >= 0 &&
+             (!('previousPending' in data) || data.previousPending is number) &&
+             (!('paidToday' in data) || data.paidToday is number) &&
+             (!('currentPending' in data) || data.currentPending is number) &&
+             (!('remarks' in data) || (data.remarks is string && data.remarks.size() < 1000)) &&
+             data.createdBy is string &&
+             data.createdAt is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isAuthenticated() && isValidUser(request.resource.data) && (isOwner(uid) || isAdmin());
+      allow update: if isAuthenticated() && isValidUser(request.resource.data) && (isAdmin() || (isOwner(uid) && request.resource.data.role == resource.data.role));
+    }
+
+    match /items/{itemId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() && isValidItem(request.resource.data);
+    }
+
+    match /vendors/{vendorId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() && isValidVendor(request.resource.data);
+    }
+
+    match /procurements/{procurementId} {
+      allow read: if isAuthenticated();
+      allow create: if (isAdmin() || isOperationExecutive()) && isValidProcurement(request.resource.data) && request.resource.data.createdBy == request.auth.uid;
+      allow update: if (isAdmin() || isOperationExecutive()) && isValidProcurement(request.resource.data) && (isAdmin() || resource.data.createdBy == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+  }
+}

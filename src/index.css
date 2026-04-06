@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #FB8C00;
+  --color-secondary: #43A047;
+  --color-accent: #FDD835;
+  --color-charcoal: #212121;
+  
+  /* Status colors */
+  --color-stock-available: #43A047;
+  --color-stock-low: #D32F2F;
+  --color-stock-pending: #FB8C00;
+}
+
+@layer base {
+  body {
+    @apply bg-white text-charcoal font-sans;
+  }
+}

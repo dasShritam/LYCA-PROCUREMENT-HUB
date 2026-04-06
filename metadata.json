@@ -1,0 +1,5 @@
+{
+  "name": "Lyca Food Procurement",
+  "description": "Automated procurement management system for Lyca Food Private Limited with role-based access control and daily reporting.",
+  "requestFramePermissions": []
+}
