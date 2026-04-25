@@ -95,8 +95,12 @@ export default function Dashboard() {
         
       >
         <div className="p-8 flex items-center gap-3">
-          <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
-            <Package className="text-white" size={28} />
+          <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-white/50 backdrop-blur-sm shadow-sm">
+             <img
+    src="https://lycafood.com/wp-content/uploads/2024/08/lycafood-logo.webp"
+    alt="logo"
+    className="w-full h-full object-contain"
+  />
           </div>
           <span className="text-2xl font-black tracking-tight text-charcoal">LYCA FOOD</span>
         </div>
