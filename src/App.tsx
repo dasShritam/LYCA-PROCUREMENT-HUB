@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import TruckLoader from "../src/components/TruckLoader";
 
 // Utility for tailwind classes
 function cn(...inputs: ClassValue[]) {
@@ -166,10 +167,7 @@ export default function App() {
                 exit={{ opacity: 0 }}
                 className="fixed inset-0 flex items-center justify-center bg-white z-50"
               >
-                <div className="flex flex-col items-center gap-4">
-                  <Loader2 className="animate-spin text-zinc-900" size={48} />
-                  <p className="text-zinc-500 font-medium animate-pulse">Loading Lyca Food...</p>
-                </div>
+               <TruckLoader />
               </motion.div>
             ) : !user ? (
               <Login key="login" />

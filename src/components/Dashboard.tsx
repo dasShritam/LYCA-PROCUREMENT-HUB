@@ -89,14 +89,9 @@ export default function Dashboard() {
       {/* Sidebar */}
       <motion.aside 
         initial={false}
-        animate={{ 
-          x: isSidebarOpen ? 0 : -300,
-          width: isSidebarOpen ? 280 : 0
-        }}
-        className={cn(
-          "fixed lg:relative z-50 h-full bg-white border-r border-orange-100 flex flex-col transition-all duration-300 ease-in-out lg:translate-x-0 lg:w-72 shadow-xl",
-          !isSidebarOpen && "lg:w-72"
-        )}
+  animate={{ x: isSidebarOpen ? 0 : -280 }}
+  transition={{ duration: 0.25 }}
+  className="fixed lg:relative z-50 h-full w-[280px] bg-white border-r border-orange-100 flex flex-col shadow-xl lg:translate-x-0"
         
       >
         <div className="p-8 flex items-center gap-3">
